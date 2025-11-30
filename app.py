@@ -1,8 +1,23 @@
+import sys
+import subprocess
+
+# --- Try to install xgboost if it's not already installed ---
+def ensure_xgboost_installed():
+    try:
+        import xgboost  # just to check if it exists
+    except ImportError:
+        print("xgboost not found. Installing xgboost...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "xgboost"])
+        print("xgboost installed successfully.")
+
+ensure_xgboost_installed()
+
+from xgboost import XGBClassifier
 import streamlit as st
 import pickle
 import pandas as pd
 import numpy as np
-from xgboost import XGBClassifier
+
 
 # --- 1. Load Model and Encoders ---
 # Ensure these files are in the same directory as your Streamlit app
@@ -36,7 +51,9 @@ def preprocess_inputs(raw_data, label_encoders, model_features):
                 processed_df[col] = encoded_val
             else:
                 # قيمة مش موجودة في التدريب → نخليها 0 أو أي default مناسب
-                st.warning(f"Unseen value '{value_to_encode}' for column '{col}'. Assigning 0.")
+                st.warning(
+                    f"Unseen value '{value_to_encode}' for column '{col}'. Assigning 0."
+                )
                 processed_df[col] = 0
 
     # نتأكد إن كل الأعمدة رقمية
@@ -82,11 +99,15 @@ def predict_severity(
         'Cause_of_accident': cause_of_accident
     }
 
-    preprocessed_input = preprocess_inputs(raw_input_data, loaded_label_encoders, model_features)
+    preprocessed_input = preprocess_inputs(
+        raw_input_data, loaded_label_encoders, model_features
+    )
 
     prediction_numerical = loaded_xgboost_model.predict(preprocessed_input)[0]
     severity_mapping = {0: 'Fatal injury', 1: 'Serious injury', 2: 'Slight injury'}
-    prediction_label = severity_mapping.get(int(prediction_numerical), 'Unknown Severity')
+    prediction_label = severity_mapping.get(
+        int(prediction_numerical), 'Unknown Severity'
+    )
     return prediction_label
 
 
