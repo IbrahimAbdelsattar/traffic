@@ -23,6 +23,28 @@ A Streamlit demonstration of accident severity classification from driver, vehic
 
 Keep `encoders.pkl` and `xgboost_accident_model.json` from the same training run. New categories must be handled consistently with the training encoders. This repository provides an inference demo; training data and a complete retraining pipeline are not included.
 
+## UML diagrams
+
+### Main workflow
+
+The Streamlit interface applies the committed category encoders before inference with the saved XGBoost JSON model.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Streamlit app.py
+    participant Encoders as encoders.pkl
+    participant Model as XGBoost JSON model
+    User->>App: Enter traffic accident features
+    App->>Encoders: Transform categorical fields
+    Encoders-->>App: Encoded feature values
+    App->>App: Arrange the 14-input feature row
+    App->>Model: predict
+    Model-->>App: Encoded severity class
+    App->>App: Map class to displayed severity
+    App-->>User: Display severity prediction
+```
+
 ## Getting started
 
 ```bash
